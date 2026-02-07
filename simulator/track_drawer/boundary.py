@@ -12,8 +12,8 @@ def calculate_boundaries(centerline_points, tangent_vectors, width):
 
         normal = tangent_normalized.normal()
 
-        left_point = tangent_normalized + normal * half_width
-        right_point = tangent_normalized - normal * half_width
+        left_point = point + normal * half_width
+        right_point = point - normal * half_width
 
         left_boundary.append(left_point)
         right_boundary.append(right_point)
