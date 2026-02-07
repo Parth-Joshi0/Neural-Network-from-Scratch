@@ -198,8 +198,8 @@ The neural network implementations (Python, C, Java) will interface with the C s
 - [x] Track drawer design
 - [x] Bézier curve implementation
 - [x] Point class with vector operations
-- [ ] Boundary calculation
-- [ ] File I/O
+- [x] Boundary calculation
+- [x] File I/O
 - [ ] Interactive GUI
 - [ ] C simulator physics engine
 - [ ] Collision detection

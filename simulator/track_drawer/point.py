@@ -30,6 +30,9 @@ class Point:
     def __repr__(self):
         return f"({self.x}, {self.y})"
 
+    def __str__(self):
+        return f"{self.x} {self.y}"
+
     def __truediv__(self, other):
         """Division by scalar"""
         if not isinstance(other, (int, float)):
