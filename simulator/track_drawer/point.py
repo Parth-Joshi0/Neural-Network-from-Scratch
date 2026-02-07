@@ -28,6 +28,15 @@ class Point:
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __repr__(self):
+        return f"({self.x}, {self.y})"
+
+    def __truediv__(self, other):
+        """Division by scalar"""
+        if not isinstance(other, (int, float)):
+            raise TypeError("Division only supported with numbers")
+        return Point(self.x / other, self.y / other)
+
     def distance_to(self, other):
         """ Returns the Euclidean Distance between Points"""
         if not isinstance(other, Point):
@@ -35,3 +44,15 @@ class Point:
         dx = self.x - other.x
         dy = self.y - other.y
         return (dx**2 + dy**2) ** 0.5
+
+    def normal(self):
+        return Point(-1 * self.y, self.x)
+
+    def magnitude(self):
+        return (self.x**2 + self.y**2) ** 0.5
+
+    def normalized(self):
+        magnitude = self.magnitude()
+        if magnitude == 0:
+            return Point(0, 0)
+        return self / magnitude
