@@ -1,6 +1,5 @@
 from attr.validators import instance_of
 
-
 class Point:
     def __init__(self, x, y):
         self.x = x
