@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from bezier import CubicBezier
-from file_io import save_track
-from boundary import calculate_boundaries
-from point import Point
+from simulator.track_drawer.bezier import CubicBezier
+from simulator.track_drawer.file_io import save_track
+from simulator.track_drawer.boundary import calculate_boundaries
+from simulator.track_drawer.point import Point
+from simulator.track_drawer.file_io import load_track
+
 
 def _pts_to_xy_np(points):
     return np.array([[p.x, p.y] for p in points], dtype=float)
@@ -22,6 +24,7 @@ class InteractiveTrackBuilder:
         self.ax.grid(True)
         self.ax.set_title('Track Builder - Click to place control points\n'
                          'First segment: 4 clicks, Next segments: 3 clicks\n'
+                          'Press T to load an existing track\n'
                          'Press ENTER to finish, ESC to undo last point')
 
         self.ax.set_xlim(0, 100)
@@ -130,6 +133,10 @@ class InteractiveTrackBuilder:
                     self.control_point_markers.pop()
                 self.fig.canvas.draw()
 
+        elif event.key == "t":
+            filename = input("Enter track filename to load: ")
+            self.load_and_draw(filename)
+
     def save_track(self, filename):
         # Collect all points
         all_centerline = []
@@ -147,3 +154,39 @@ class InteractiveTrackBuilder:
 
         # Save to file
         save_track(filename, self.segments, left_boundary, right_boundary, self.width)
+
+    def load_and_draw(self, filename):
+        self.width, self.segments, left_b, right_b = load_track(filename)
+
+        # Clear existing visuals
+        for m in self.control_point_markers:
+            m.remove()
+        self.control_point_markers = []
+        self.current_control_points = []
+
+        for ln in self.curve_lines + self.boundary_lines:
+            ln.remove()
+        self.curve_lines = []
+        self.boundary_lines = []
+
+        # Draw centerlines from segments
+        for seg in self.segments:
+            pts, _ = seg.sample_arc_length(self.points_per_segment)
+            arr = _pts_to_xy_np(pts)
+            line, = self.ax.plot(arr[:, 0], arr[:, 1], "b-", linewidth=2)
+            self.curve_lines.append(line)
+
+        # Draw boundaries from file
+        left_array = _pts_to_xy_np(left_b)
+        right_array = _pts_to_xy_np(right_b)
+        left_line, = self.ax.plot(left_array[:, 0], left_array[:, 1], "g--", linewidth=1.5, label="Left")
+        right_line, = self.ax.plot(right_array[:, 0], right_array[:, 1], "r--", linewidth=1.5, label="Right")
+        self.boundary_lines.extend([left_line, right_line])
+
+        # Draw control points for all segments so they're visible
+        for seg in self.segments:
+            for cp in [seg.w0, seg.w1, seg.w2, seg.w3]:
+                self.ax.plot(cp.x, cp.y, 'bs', markersize=6, alpha=0.5)  # Blue squares, semi-transparent
+
+        self.ax.legend()
+        self.fig.canvas.draw()

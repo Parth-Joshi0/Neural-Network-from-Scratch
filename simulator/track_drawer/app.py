@@ -1,11 +1,11 @@
-# Quick test
-from interactive_builder import InteractiveTrackBuilder
+from simulator.track_drawer.interactive_builder import InteractiveTrackBuilder
 
-TRACK_WIDTH = 5.0
-POINTS_PER_SEGMENT = 100
+if __name__ == "__main__":
+    TRACK_WIDTH = 5.0
+    POINTS_PER_SEGMENT = 100
 
-# Launch interactive builder
-builder = InteractiveTrackBuilder(
-    width=TRACK_WIDTH,
-    points_per_segment=POINTS_PER_SEGMENT
-)
+    # Launch interactive builder
+    builder = InteractiveTrackBuilder(
+        width=TRACK_WIDTH,
+        points_per_segment=POINTS_PER_SEGMENT
+    )
