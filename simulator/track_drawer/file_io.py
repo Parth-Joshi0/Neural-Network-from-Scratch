@@ -8,13 +8,13 @@ def save_track(track_name, segments, left_boundary, right_boundary, width):
         f.write(f"SEGMENTS {len(segments)}\n")
         f.write("\n")
 
-        for i, segments in enumerate(segments):
+        for i, segment in enumerate(segments):
             f.write(f"SEGMENT {i}\n")
             f.write(f"CONTROL_POINTS {4}\n")
-            f.write(f"{segments[0]}\n")
-            f.write(f"{segments[1]}\n")
-            f.write(f"{segments[2]}\n")
-            f.write(f"{segments[3]}\n")
+            f.write(f"{segment.w0}\n")
+            f.write(f"{segment.w1}\n")
+            f.write(f"{segment.w2}\n")
+            f.write(f"{segment.w3}\n")
             f.write(f"\n")
 
         f.write(f"LEFT_BOUNDARY {len(left_boundary)}\n")
