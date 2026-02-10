@@ -32,9 +32,10 @@ struct Track {
 static void track_create_segments(Track *track);
 static void track_calculate_lengths(Track *track);
 void free_track(Track *track);
+void *xalloc(size_t num, size_t size);
 
 Track* load_track(const char *filename) {
-    Track *track = malloc(sizeof(Track));
+    Track *track = xalloc(1, sizeof(Track));
 
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -111,7 +112,7 @@ Track* load_track(const char *filename) {
     }
 
     track->left_boundary.count = left_boundary_points;
-    track->left_boundary.points = malloc(left_boundary_points * sizeof(Point));
+    track->left_boundary.points = xalloc(left_boundary_points, sizeof(Point));
 
     for (int i = 0; i < left_boundary_points; i++) { // Read left boundary points
         fgets(line, sizeof(line), file);
@@ -135,7 +136,7 @@ Track* load_track(const char *filename) {
     }
 
     track->right_boundary.count = right_boundary_points;
-    track->right_boundary.points = malloc(right_boundary_points * sizeof(Point));
+    track->right_boundary.points = xalloc(right_boundary_points, sizeof(Point));
 
     if (left_boundary_points != right_boundary_points) {
         fprintf(stderr, "Error: Left and right boundary points count mismatch in file %s\n", filename);
@@ -169,8 +170,8 @@ static void track_create_segments(Track *track) {
     int right_segs = track->right_boundary.count - 1;
     track->num_boundary_segments = left_segs + right_segs;
 
-    track->left_boundary_segments = malloc(left_segs * sizeof(BoundarySegment));
-    track->right_boundary_segments = malloc(right_segs * sizeof(BoundarySegment));
+    track->left_boundary_segments = xalloc(left_segs, sizeof(BoundarySegment));
+    track->right_boundary_segments = xalloc(right_segs, sizeof(BoundarySegment));
 
     for (int i =0; i < left_segs; i++) {
         BoundarySegment *left_segment = &track->left_boundary_segments[i];
@@ -208,7 +209,7 @@ static void track_create_segments(Track *track) {
 }
 
 static void track_calculate_lengths(Track *track) {
-    track->cumulative_length = malloc(track->left_boundary.count * sizeof(float));
+    track->cumulative_length = xalloc(track->left_boundary.count, sizeof(float));
     track->cumulative_length[0] = 0.0f;  // Start is at distance 0
     for (int i = 1; i < track->left_boundary.count; i++) {
         float dx = track->left_boundary.points[i].x - track->left_boundary.points[i-1].x;
@@ -235,4 +236,13 @@ float track_width(const Track *t) {
 
 float track_total_length(const Track *t) {
     return t->cumulative_length[t->left_boundary.count - 1];
+}
+
+void *xalloc(size_t num, size_t size) {
+    void *ptr = calloc(num, size);
+    if (ptr == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+    return ptr;
 }
