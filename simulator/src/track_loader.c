@@ -18,7 +18,7 @@ typedef struct {
     float length;
 } BoundarySegment;
 
-typedef struct {
+struct Track {
     float width;
     Boundary left_boundary;
     Boundary right_boundary;
@@ -27,7 +27,11 @@ typedef struct {
     BoundarySegment *right_boundary_segments;
     float *cumulative_length;
     float total_length;
-} Track;
+};
+
+static void track_create_segments(Track *track);
+static void track_calculate_lengths(Track *track);
+void free_track(Track *track);
 
 Track* load_track(const char *filename) {
     Track *track = malloc(sizeof(Track));
@@ -72,7 +76,12 @@ Track* load_track(const char *filename) {
         fgets(line, sizeof(line), file); // CONTROL_POINTS
         int count;
         if (sscanf(line, "CONTROL_POINTS %d", &count) != 1) {
-            fprintf(stderr, "Expected 4 Control Points got %d\n", count);
+            fprintf(stderr, "Reading Control Points Failed\n");
+            goto CLEANUP;
+        }
+
+        if (count != 4) {
+            fprintf(stderr, "Expected 4 control points for segment %d, got %d\n", i+1, count);
             goto CLEANUP;
         }
 
@@ -155,7 +164,7 @@ Track* load_track(const char *filename) {
 
 }
 
-void track_create_segments(Track *track) {
+static void track_create_segments(Track *track) {
     int left_segs = track->left_boundary.count - 1;
     int right_segs = track->right_boundary.count - 1;
     track->num_boundary_segments = left_segs + right_segs;
@@ -198,7 +207,7 @@ void track_create_segments(Track *track) {
     }
 }
 
-void track_calculate_lengths(Track *track) {
+static void track_calculate_lengths(Track *track) {
     track->cumulative_length = malloc(track->left_boundary.count * sizeof(float));
     track->cumulative_length[0] = 0.0f;  // Start is at distance 0
     for (int i = 1; i < track->left_boundary.count; i++) {
@@ -218,4 +227,12 @@ void free_track(Track *track) {
         free(track->cumulative_length);
         free(track);
     }
+}
+
+float track_width(const Track *t) {
+    return t->width;
+}
+
+float track_total_length(const Track *t) {
+    return t->cumulative_length[t->left_boundary.count - 1];
 }
