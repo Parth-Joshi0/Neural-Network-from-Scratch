@@ -11,4 +11,6 @@ typedef struct {
     float y;
 } Vector2d;
 
+enum { NUM_RAYS = 8 };
+
 #endif // TYPES_H
