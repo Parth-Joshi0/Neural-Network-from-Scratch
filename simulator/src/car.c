@@ -1,25 +1,9 @@
 #include "car.h"
+#include "car_internal.h"
 #include "types.h"
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
-
-struct Car {
-    Point position;
-    Vector2d velocity;
-    float speed; // scalar magnitude of velocity
-    float acceleration;
-    float steering_angle; // Angle in radians representing the car's current steering direction
-
-    float ray_distances[NUM_RAYS];
-
-    int furthest_point_index; // Reward Function
-    float total_distance_traveled;
-    float time_alive;
-
-    int no_movement_frames; // counter for stationary frames
-    bool is_alive;
-};
 
 Car *create_car(Point start_position, float start_direction)
 {
@@ -30,9 +14,7 @@ Car *create_car(Point start_position, float start_direction)
     }
 
     car->position = start_position;
-    car->steering_angle = start_direction;
-    car->velocity.x = 0.0f;
-    car->velocity.y = 0.0f;
+    car->heading = start_direction;
     car->is_alive = true;
 
     return car;
@@ -45,11 +27,13 @@ Car *reset_car(Car *car, Point start_position, float start_direction)
     }
 
     car->position = start_position;
-    car->steering_angle = start_direction;
+    car->heading = start_direction;
+    car->steering_angle = 0.0f;
     car->velocity.x = 0.0f;
     car->velocity.y = 0.0f;
     car->speed = 0.0f;
     car->acceleration = 0.0f;
+    car->angular_velocity = 0.0f;
     car->furthest_point_index = 0;
     car->total_distance_traveled = 0.0f;
     car->time_alive = 0.0f;
