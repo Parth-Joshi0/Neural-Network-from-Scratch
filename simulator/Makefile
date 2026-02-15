@@ -2,19 +2,22 @@ CC = gcc
 CFLAGS = -Iinclude -Wall -Wextra -std=c11
 LDFLAGS = -lm
 
-simulator: main.o track_loader.o car.o physics.o
+simulator: main.o track_loader.o car.o physics.o quad_tree.o
 	$(CC) -o simulator main.o track_loader.o car.o physics.o $(LDFLAGS)
 
 main.o: src/main.c
 	$(CC) -c src/main.c $(CFLAGS)
 
-track_loader.o: src/track_loader.c
+track_loader.o: src/track_loader.c include/track_loader.h include/track_internals.h include/types.h
 	$(CC) -c src/track_loader.c $(CFLAGS)
 
-car.o: src/car.c
+car.o: src/car.c include/car.h include/car_internals.h include/types.h
 	$(CC) -c src/car.c $(CFLAGS)
 
-physics.o: src/physics.c
+physics.o: src/physics.c include/physics.h include/physics_constants.h include/car_internals.h include/types.h
+	$(CC) -c src/physics.c $(CFLAGS)
+
+quad_tree.o: src/quad_tree.c include/track_internals.h include/quad_tree.h include/types.h
 	$(CC) -c src/physics.c $(CFLAGS)
 
 clean:

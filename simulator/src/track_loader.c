@@ -5,29 +5,7 @@
 
 #include "types.h"
 #include "track_loader.h"
-
-typedef struct {
-    int count;
-    Point *points;
-} Boundary;
-
-typedef struct {
-    Point start;
-    Point end;
-    Vector2d normal;
-    float length;
-} BoundarySegment;
-
-struct Track {
-    float width;
-    Boundary left_boundary;
-    Boundary right_boundary;
-    int num_boundary_segments;
-    BoundarySegment *left_boundary_segments;
-    BoundarySegment *right_boundary_segments;
-    float *cumulative_length;
-    float total_length;
-};
+#include "track_internals.h"
 
 static void track_create_segments(Track *track);
 static void track_calculate_lengths(Track *track);
