@@ -12,7 +12,7 @@ typedef struct {
 struct BoundarySegment {
     Point start;
     Point end;
-    Vector2d normal;
+    Vector2d normal; // Pointing Inwards toward track center
     float length;
 } BoundarySegment;
 
