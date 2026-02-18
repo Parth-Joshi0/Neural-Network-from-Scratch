@@ -92,6 +92,22 @@ QuadTreeNode* createQuadTreeNode(Bounds bounds, BoundarySegment* segment, int se
     return node;
 }
 
+void free_quadtree(QuadTreeNode* node) {
+    if (!node) {
+        return;
+    }
+
+    if (node->segments) {
+        free(node->segments);
+    }
+
+    for (int i = 0; i < 4; i++) {
+        free_quadtree(node->children[i]);
+    }
+
+    free(node);
+}
+
 void *xalloc(size_t num, size_t size) {
     void *ptr = calloc(num, size);
     if (ptr == NULL) {
