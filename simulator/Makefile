@@ -11,13 +11,13 @@ main.o: src/main.c
 test: test.o track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o
 	$(CC) -o test test.o track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o $(LDFLAGS)
 
-test.o: src/test.c
+test.o: src/test.c include/util.h include/track_internals.h include/car.h include/physics.h include/ray_cast.h include/quad_tree.h
 	$(CC) -c src/test.c $(CFLAGS)
 
 track_loader.o: src/track_loader.c include/track_loader.h include/track_internals.h include/types.h include/util.h
 	$(CC) -c src/track_loader.c $(CFLAGS)
 
-car.o: src/car.c include/car.h include/car_internals.h include/types.h
+car.o: src/car.c include/car.h include/car_internals.h include/types.h include/util.h
 	$(CC) -c src/car.c $(CFLAGS)
 
 physics.o: src/physics.c include/physics.h include/physics_constants.h include/car_internals.h include/types.h

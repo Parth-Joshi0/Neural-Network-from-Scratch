@@ -1,13 +1,14 @@
 #include "car.h"
 #include "car_internals.h"
 #include "types.h"
+#include "util.h"
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
 
 Car *create_car(Point start_position, float start_direction)
 {
-    Car *car = calloc(1, sizeof(Car));
+    Car *car = xalloc(1, sizeof(Car));
     if (car == NULL) {
         fprintf(stderr, "Error: Unable to allocate memory for Car.\n");
         return NULL; // Allocation failed
