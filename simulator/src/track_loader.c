@@ -35,7 +35,6 @@ Track* load_track(const char *filename) {
 
     track->width = track_width;
 
-
     int segments;
     fgets(line, sizeof(line), file); // Read number of segments
     sscanf(line, "SEGMENTS %d", &segments);
@@ -161,9 +160,23 @@ static void track_create_segments(Track *track) {
         float ldy = left_segment->end.y - left_segment->start.y;
         left_segment->length = sqrtf(ldx * ldx + ldy * ldy);
 
-        if (left_segment->length > 0) { // Calculate normal vector (perpendicular to the segment)
+        if (left_segment->length > 0) { // Calculate normal vector (pointing inwards to track center)
             left_segment->normal.x = -ldy / left_segment->length;
             left_segment->normal.y = ldx / left_segment->length;
+
+            // Grab a reference point we know is inside the track (corresponding right boundary point)
+            Point interior_ref = track->right_boundary.points[i];
+
+            // Vector from segment start to the interior reference point
+            float to_interior_x = interior_ref.x - left_segment->start.x;
+            float to_interior_y = interior_ref.y - left_segment->start.y;
+
+            // Dot product: if negative, normal points away from interior, so flip it
+            float dot = to_interior_x * left_segment->normal.x + to_interior_y * left_segment->normal.y;
+            if (dot < 0) {
+                left_segment->normal.x = -left_segment->normal.x;
+                left_segment->normal.y = -left_segment->normal.y;
+            }
         } else {
             left_segment->normal.x = 0;
             left_segment->normal.y = 0;
@@ -177,9 +190,23 @@ static void track_create_segments(Track *track) {
         float rdy = right_segment->end.y - right_segment->start.y;
         right_segment->length = sqrtf(rdx * rdx + rdy * rdy);
 
-        if (right_segment->length > 0) { // Calculate normal vector (perpendicular to the segment)
+        if (right_segment->length > 0) { // Calculate normal vector (pointing inwards to track center)
             right_segment->normal.x = -rdy / right_segment->length;
             right_segment->normal.y = rdx / right_segment->length;
+
+            // Grab a reference point we know is inside the track (corresponding left boundary point)
+            Point interior_ref = track->left_boundary.points[i];
+
+            // Vector from segment start to the interior reference point
+            float to_interior_x = interior_ref.x - right_segment->start.x;
+            float to_interior_y = interior_ref.y - right_segment->start.y;
+                
+            // Dot product: if negative, normal points away from interior, so flip it
+            float dot = to_interior_x * right_segment->normal.x + to_interior_y * right_segment->normal.y;
+            if (dot < 0) {
+                right_segment->normal.x = -right_segment->normal.x;
+                right_segment->normal.y = -right_segment->normal.y;
+            }
         } else {
             right_segment->normal.x = 0;
             right_segment->normal.y = 0;
