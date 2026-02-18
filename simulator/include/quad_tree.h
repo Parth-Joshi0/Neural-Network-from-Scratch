@@ -5,18 +5,24 @@
 #include "track_internals.h"
 
 typedef struct {
-    int min_x;
-    int min_y;
-    int max_x;
-    int max_y;
+    float min_x;
+    float min_y;
+    float max_x;
+    float max_y;
 } Bounds;
 
 typedef struct QuadTreeNode {
     Bounds bounds;
-    BoundarySegment* segments;
+    struct BoundarySegment* segments;
     int segment_count;
-    struct QuadtreeNode *children[4];
+    struct QuadTreeNode *children[4];
 } QuadTreeNode;
+
+Bounds calculateBounds(Point* points, int count);
+QuadTreeNode* createQuadTreeNode(Bounds bounds, struct BoundarySegment* segment, int segment_count, int depth);
+void free_quadtree(QuadTreeNode* node);
+int segmentIntersectsBound(Bounds* bound, struct BoundarySegment* segment);
+int pointIntersectsBound(Point p, Bounds* bound);
 
 #define MAX_DEPTH 8
 #define MAX_SEGMENTS_PER_NODE 10

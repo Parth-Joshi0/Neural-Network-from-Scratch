@@ -9,7 +9,7 @@ typedef struct {
     Point *points;
 } Boundary;
 
-typedef struct {
+struct BoundarySegment {
     Point start;
     Point end;
     Vector2d normal;
@@ -21,8 +21,8 @@ struct Track {
     Boundary left_boundary;
     Boundary right_boundary;
     int num_boundary_segments;
-    BoundarySegment *left_boundary_segments;
-    BoundarySegment *right_boundary_segments;
+    struct BoundarySegment *left_boundary_segments;
+    struct BoundarySegment *right_boundary_segments;
     float *cumulative_length;
     float total_length;
 };

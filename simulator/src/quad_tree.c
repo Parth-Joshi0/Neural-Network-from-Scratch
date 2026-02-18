@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 void *xalloc(size_t num, size_t size);
 
@@ -20,7 +21,7 @@ Bounds calculateBounds(Point* points, int count){
     return b;
 }
 
-int segmentIntersectsBound(Bounds* bound, BoundarySegment* segment){
+int segmentIntersectsBound(Bounds* bound, struct BoundarySegment* segment){
     // Check if either enpoint is in the bound
     if (pointIntersectsBound(segment->start, bound) || pointIntersectsBound(segment->end, bound))
         return 1;
@@ -46,7 +47,7 @@ int pointIntersectsBound(Point p, Bounds* bound) {
     return 0;
 }
 
-QuadTreeNode* createQuadTreeNode(Bounds bounds, BoundarySegment* segment, int segment_count, int depth){
+QuadTreeNode* createQuadTreeNode(Bounds bounds, struct BoundarySegment* segment, int segment_count, int depth){
     QuadTreeNode* node = xalloc(1, sizeof(QuadTreeNode));
     node->bounds = bounds;
     node->segment_count = 0;
@@ -73,16 +74,16 @@ QuadTreeNode* createQuadTreeNode(Bounds bounds, BoundarySegment* segment, int se
     };
 
     for (int i= 0; i<4; i++) {
-        BoundarySegment* child_segments = xalloc(segment_count, sizeof(BoundarySegment));
+        struct BoundarySegment* child_segments = xalloc(segment_count, sizeof(BoundarySegment));
         int child_count = 0;
 
         for (int j = 0; j < segment_count; j++) {
-            if (segmentIntersectsBound(&segment[j], &child_Bounds[i])) {
+            if (segmentIntersectsBound(&child_Bounds[i], &segment[j])) {
                 child_segments[child_count++] = segment[j];
             }
         }
 
-        if (child_segments > 0) {
+        if (child_count > 0) {
             node -> children[i] = createQuadTreeNode(child_Bounds[i], child_segments, child_count, depth + 1);
         }
         
@@ -106,13 +107,4 @@ void free_quadtree(QuadTreeNode* node) {
     }
 
     free(node);
-}
-
-void *xalloc(size_t num, size_t size) {
-    void *ptr = calloc(num, size);
-    if (ptr == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-    return ptr;
 }

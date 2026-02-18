@@ -1,6 +1,6 @@
 #include "physics.h"
 #include "physics_constants.h"
-#include "car_internal.h"
+#include "car_internals.h"
 #include <math.h>
 #include <stdio.h>
 

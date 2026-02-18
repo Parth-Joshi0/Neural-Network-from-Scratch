@@ -6,6 +6,7 @@
 #include "types.h"
 #include "track_loader.h"
 #include "track_internals.h"
+#include "util.h"
 
 static void track_create_segments(Track *track);
 static void track_calculate_lengths(Track *track);
@@ -148,11 +149,11 @@ static void track_create_segments(Track *track) {
     int right_segs = track->right_boundary.count - 1;
     track->num_boundary_segments = left_segs + right_segs;
 
-    track->left_boundary_segments = xalloc(left_segs, sizeof(BoundarySegment));
-    track->right_boundary_segments = xalloc(right_segs, sizeof(BoundarySegment));
+    track->left_boundary_segments = xalloc(left_segs, sizeof(struct BoundarySegment));
+    track->right_boundary_segments = xalloc(right_segs, sizeof(struct BoundarySegment));
 
     for (int i =0; i < left_segs; i++) {
-        BoundarySegment *left_segment = &track->left_boundary_segments[i];
+        struct BoundarySegment *left_segment = &track->left_boundary_segments[i];
         left_segment->start = track->left_boundary.points[i];
         left_segment->end = track->left_boundary.points[i + 1];
 
@@ -168,7 +169,7 @@ static void track_create_segments(Track *track) {
             left_segment->normal.y = 0;
         }
 
-        BoundarySegment *right_segment = &track->right_boundary_segments[i];
+        struct BoundarySegment *right_segment = &track->right_boundary_segments[i];
         right_segment->start = track->right_boundary.points[i];
         right_segment->end = track->right_boundary.points[i + 1];
 
@@ -214,13 +215,4 @@ float track_width(const Track *t) {
 
 float track_total_length(const Track *t) {
     return t->cumulative_length[t->left_boundary.count - 1];
-}
-
-void *xalloc(size_t num, size_t size) {
-    void *ptr = calloc(num, size);
-    if (ptr == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-    return ptr;
 }
