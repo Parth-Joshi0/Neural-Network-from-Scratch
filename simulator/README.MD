@@ -200,8 +200,8 @@ The neural network implementations (Python, C, Java) will interface with the C s
 - [x] Point class with vector operations
 - [x] Boundary calculation
 - [x] File I/O
-- [x] Interactive GUI
-- [ ] C simulator physics engine
+- [x] Interactive GUI for track drawer
+- [x] C simulator physics engine
 - [ ] Collision detection
 - [ ] Neural network interface
 - [ ] Multi-instance parallelization

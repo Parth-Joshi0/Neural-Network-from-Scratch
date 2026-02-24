@@ -1,0 +1,20 @@
+#ifndef PHYSICS_CONSTANTS
+#define PHYSICS_CONSTANTS
+
+#define MAX_FORWARD_SPEED 5.0f
+#define MAX_REVERSE_SPEED 1.0f
+
+#define MAX_ACCELERATION 1.0f
+#define MAX_DELTA_ACCELERATION 0.1f
+
+#define MAX_STEERING_ANGLE 0.523599f // 30 degrees in radians
+#define MAX_DELTA_STEERING 0.0872665f // 5 degrees in radians
+
+#define DRAG_COEFFICIENT 0.995f
+#define FRICTION_COEFFICIENT 0.9f
+
+#define TURN_FACTOR 1.0
+
+#define PI 3.1415926
+
+#endif
