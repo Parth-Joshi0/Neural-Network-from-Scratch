@@ -9,11 +9,17 @@ typedef struct {
     Point *points;
 } Boundary;
 
+typedef enum {
+    BOUNDARY_LEFT, 
+    BOUNDARY_RIGHT
+} BoundaryType;
+
 struct BoundarySegment {
     Point start;
     Point end;
     Vector2d normal; // Pointing Inwards toward track center
     float length;
+    BoundaryType type;
 } BoundarySegment;
 
 struct Track {

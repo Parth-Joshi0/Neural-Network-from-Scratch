@@ -23,4 +23,7 @@ struct Car {
     bool is_alive;
 };
 
+#define CAR_HALF_WIDTH 0.5
+#define CAR_HALF_LENGTH 0.75
+
 #endif

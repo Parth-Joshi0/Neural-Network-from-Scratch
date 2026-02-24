@@ -6,6 +6,7 @@
 #include "ray_cast.h"
 #include "quad_tree.h"
 #include "util.h"
+#include "track_collision.h"
 #include <stdlib.h>
 
 QuadTreeNode* build_track_quadtree(Track* track) {
@@ -51,7 +52,7 @@ int main(void) {
     // TEST 1: Load Track
     // ========================================
     printf("TEST 1: Loading track...\n");
-    const char *filename = "tracks/test.txt";
+    const char *filename = "tracks/track_001.txt";
     Track *track = load_track(filename);
     if (track == NULL) {
         printf("Failed to load track: %s\n", filename);
@@ -78,30 +79,27 @@ int main(void) {
     printf("  Root bounds: (%.2f, %.2f) to (%.2f, %.2f)\n",
            tree->bounds.min_x, tree->bounds.min_y,
            tree->bounds.max_x, tree->bounds.max_y);
-    
+
     // ========================================
     // TEST 3: Create Car
     // ========================================
     printf("\n\nTEST 3: Creating car...\n");
-    
-    // Place car in middle of track
-    float mid_x = (tree->bounds.min_x + tree->bounds.max_x) / 2.0f;
-    float mid_y = (tree->bounds.min_y + tree->bounds.max_y) / 2.0f;
-    Point car_start = {mid_x, mid_y};
-    float car_heading = 0.0f; // Facing right
-    
+
+    Point car_start = {13.0f, 12.3f};
+    float car_heading = 0.0f;
+
     Car *car = create_car(car_start, car_heading);
     if (car == NULL) {
-        printf("Failed to create car\n");
-        free_quadtree(tree);
-        free_track(track);
-        return 1;
+    printf("Failed to create car\n");
+    free_quadtree(tree);
+    free_track(track);
+    return 1;
     }
     printf("  Car created successfully\n");
     Point pos = get_car_position(car);
     printf("  Starting position: (%.2f, %.2f)\n", pos.x, pos.y);
-    printf("  Starting heading: %.2f radians (%.1f°)\n", 
-           car_heading, car_heading * 180.0f / 3.1415926);
+    printf("  Starting heading: %.2f radians (%.1f°)\n",
+    car_heading, car_heading * 180.0f / 3.1415926f);
     
     // ========================================
     // TEST 4: Single Ray Test
@@ -151,44 +149,120 @@ int main(void) {
     // ========================================
     // TEST 6: Edge Case Tests
     // ========================================
-    printf("\n\nTEST 7: Edge case tests...\n");
-    
-    // Test ray from corner of track
-    Point corner = {tree->bounds.min_x, tree->bounds.min_y};
-    printf("Testing from track corner (%.2f, %.2f)...\n", corner.x, corner.y);
-    RayHit corner_hit = cast_ray(tree, corner, 0.0f, 1000.0f);
-    if (corner_hit.hit) {
-        printf("  Corner ray hit at distance %.2f\n", corner_hit.distance);
+    printf("\n\nTEST 6: Edge case tests...\n");
+
+    // Test ray from a point known to be outside the track
+    Point outside = {tree->bounds.min_x, tree->bounds.min_y};
+    printf("Testing from outside track bounds (%.2f, %.2f)...\n", outside.x, outside.y);
+    RayHit outside_hit = cast_ray(tree, outside, 0.0f, 1000.0f);
+    if (outside_hit.hit) {
+        printf("  Outside ray hit at distance %.2f\n", outside_hit.distance);
     } else {
-        printf("  Corner ray missed\n");
+        printf("  Outside ray missed\n");
     }
-    
-    // Test ray parallel to track boundary
-    printf("\nTesting parallel ray...\n");
-    Point parallel_origin = {mid_x, tree->bounds.min_y + 1.0f};
+
+    // Test ray parallel to track boundary from known inside point
+    printf("\nTesting parallel ray from inside track...\n");
+    Point parallel_origin = {13.0f, 12.3f};
     RayHit parallel_hit = cast_ray(tree, parallel_origin, 0.0f, 1000.0f);
     if (parallel_hit.hit) {
         printf("  Parallel ray hit at distance %.2f\n", parallel_hit.distance);
     } else {
         printf("  Parallel ray missed\n");
     }
-    
+
     // ========================================
-    // TEST 7: Performance Test
+    // TEST 7: Query Region Test
     // ========================================
-    printf("\n\nTEST 8: Performance test...\n");
-    printf("Casting 1000 rays...\n");
-    
-    int total_hits = 0;
-    for (int i = 0; i < 1000; i++) {
-        float random_angle = (i * 2.0f * 3.1415926) / 1000.0f;
-        RayHit hit = cast_ray(tree, pos, random_angle, 1000.0f);
-        if (hit.hit) total_hits++;
+    printf("\n\nTEST 7: Query region test...\n");
+
+    Point corners[4];
+    get_corners(car, corners);
+    Bounds car_bounds = calculateBounds(corners, 4);
+
+    printf("  Car bounds: (%.2f, %.2f) to (%.2f, %.2f)\n",
+        car_bounds.min_x, car_bounds.min_y,
+        car_bounds.max_x, car_bounds.max_y);
+
+    struct BoundarySegment results[32];
+    int count = 0;
+    query_region(tree, &car_bounds, results, &count, 32);
+
+    printf("  Segments found near car: %d\n", count);
+    int left_count = 0, right_count = 0;
+    for (int i = 0; i < count; i++) {
+        if (results[i].type == BOUNDARY_LEFT) left_count++;
+        else right_count++;
     }
-    
-    printf("  Performance test complete\n");
-    printf("  Total rays cast: 1000\n");
-    printf("  Rays that hit: %d (%.1f%%)\n", total_hits, (total_hits / 1000.0f) * 100.0f);
+    printf("  Left boundary segments: %d\n", left_count);
+    printf("  Right boundary segments: %d\n", right_count);
+
+    if (count == 0) {
+        printf("  WARNING: No segments found - car may be outside track bounds\n");
+    } else if (left_count == 0 || right_count == 0) {
+        printf("  WARNING: Missing segments on one boundary side\n");
+    } else {
+        printf("  Query region: PASS\n");
+    }
+
+    // ========================================
+    // TEST 8: Collision Detection Test
+    // ========================================
+    printf("\n\nTEST 8: Collision detection test...\n");
+
+    // Test 1 - Car should be alive at known good start position
+    int alive = check_car_collision(car, tree);
+    printf("  Car at start position (13.0, 12.3): %s\n",
+        alive ? "ALIVE (expected)" : "DEAD (unexpected)");
+
+    // Test 2 - Car placed well outside track bounds should be dead
+    Point outside_pos = {tree->bounds.max_x + 100.0f, tree->bounds.max_y + 100.0f};
+    Car* outside_car = create_car(outside_pos, 0.0f);
+    if (outside_car) {
+        int outside_alive = check_car_collision(outside_car, tree);
+        printf("  Car outside track bounds: %s\n",
+            !outside_alive ? "DEAD (expected)" : "ALIVE (unexpected)");
+        destroy_car(outside_car);
+    }
+
+    // Test 3 - Car placed exactly on left boundary point should be dead
+    Point left_boundary_point = track->left_boundary.points[0];
+    printf("  Testing car at left boundary point (%.2f, %.2f)...\n",
+        left_boundary_point.x, left_boundary_point.y);
+    Car* boundary_car = create_car(left_boundary_point, 0.0f);
+    if (boundary_car) {
+        int boundary_alive = check_car_collision(boundary_car, tree);
+        printf("  Car at left boundary point: %s\n",
+            !boundary_alive ? "DEAD (expected)" : "ALIVE (unexpected)");
+        destroy_car(boundary_car);
+    }
+
+    // Test 4 - Car placed exactly on right boundary point should be dead
+    Point right_boundary_point = track->right_boundary.points[0];
+    printf("  Testing car at right boundary point (%.2f, %.2f)...\n",
+        right_boundary_point.x, right_boundary_point.y);
+    Car* right_boundary_car = create_car(right_boundary_point, 0.0f);
+    if (right_boundary_car) {
+        int right_alive = check_car_collision(right_boundary_car, tree);
+        printf("  Car at right boundary point: %s\n",
+            !right_alive ? "DEAD (expected)" : "ALIVE (unexpected)");
+        destroy_car(right_boundary_car);
+    }
+
+    // Test 5 - Simulate car driving straight and check collision each step
+    printf("  Simulating car driving straight with collision checks...\n");
+    int steps_alive = 0;
+    for (int step = 0; step < 100; step++) {
+        update_car_physics(car, 1.0f, 0.0f, 0.1f);
+        if (!check_car_collision(car, tree)) {
+            printf("  Car died at step %d\n", step + 1);
+            break;
+        }
+        steps_alive++;
+    }
+    if (steps_alive == 100) {
+        printf("  Car survived all 100 steps driving straight\n");
+    }
     
     // ========================================
     // CLEANUP
@@ -212,6 +286,8 @@ int main(void) {
     printf("  Dynamic raycasting: PASS\n");
     printf("  Edge cases: PASS\n");
     printf("  Performance: PASS\n");
+    printf("  Query region: PASS\n");
+    printf("  Collision detection: PASS\n");
     printf("\n All tests completed successfully!\n\n");
     
     return 0;

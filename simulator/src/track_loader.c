@@ -156,6 +156,8 @@ static void track_create_segments(Track *track) {
         left_segment->start = track->left_boundary.points[i];
         left_segment->end = track->left_boundary.points[i + 1];
 
+        left_segment->type = BOUNDARY_LEFT;
+
         float ldx = left_segment->end.x - left_segment->start.x; // Calculate segment length
         float ldy = left_segment->end.y - left_segment->start.y;
         left_segment->length = sqrtf(ldx * ldx + ldy * ldy);
@@ -185,6 +187,8 @@ static void track_create_segments(Track *track) {
         struct BoundarySegment *right_segment = &track->right_boundary_segments[i];
         right_segment->start = track->right_boundary.points[i];
         right_segment->end = track->right_boundary.points[i + 1];
+        
+        right_segment->type = BOUNDARY_RIGHT;
 
         float rdx = right_segment->end.x - right_segment->start.x; // Calculate segment length
         float rdy = right_segment->end.y - right_segment->start.y;

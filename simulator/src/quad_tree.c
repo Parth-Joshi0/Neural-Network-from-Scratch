@@ -3,8 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-void *xalloc(size_t num, size_t size);
+#include "util.h"
 
 Bounds calculateBounds(Point* points, int count){
     Bounds b;
@@ -107,4 +106,64 @@ void free_quadtree(QuadTreeNode* node) {
     }
 
     free(node);
+}
+
+int boundIntersectsBounds(Bounds* region1, Bounds* region2){
+    if (region1 == NULL || region2 == NULL){
+        return 0;
+    }
+
+    if (region1->max_x < region2->min_x) return 0; // region1 left of region2
+    if (region2->max_x < region1->min_x) return 0; // region2 left of region1
+    if (region1->max_y < region2->min_y) return 0; // region1 below region2
+    if (region2->max_y < region1->min_y) return 0; // region2 below region1
+
+    return 1;
+}
+
+void query_region(QuadTreeNode* node, Bounds* region, struct BoundarySegment* results, int* count, int max_results) {
+    // Recursively queries the quadtree for BoundarySegments intersecting the given
+    // region. Uses node-bound pruning, tests segments in leaf nodes, avoids
+    // duplicates, and appends matches to results up to max_results.
+
+    if (node == NULL || !boundIntersectsBounds(&node->bounds, region)) {
+        return;
+    }
+
+    if (node->children[0] == NULL) {
+        // Leaf Node
+        for (int i = 0; i < node->segment_count; i++) {
+            struct BoundarySegment segment = node->segments[i];
+            if (segmentIntersectsBound(region, &segment)) {
+                int is_duplicate = 0;
+
+                for (int j = 0; j < *count; j++) {
+                    if (results[j].start.x == segment.start.x &&
+                        results[j].start.y == segment.start.y &&
+                        results[j].end.x == segment.end.x &&
+                        results[j].end.y == segment.end.y) {
+
+                        is_duplicate = 1;
+                        break;
+                    }
+                }
+
+                if (!is_duplicate && *count < max_results) {
+                    results[*count] = segment;
+                    (*count)++;
+                }
+             }
+        }
+    }
+    else {
+        // Branch Node
+        for (int i = 0; i < 4; i++) {
+            if (node->children[i]) {
+                if (*count >= max_results) return;
+                query_region(node->children[i], region, results, count, max_results);
+            }
+        }
+    }
+
+    return;
 }

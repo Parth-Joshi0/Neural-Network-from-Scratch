@@ -23,7 +23,8 @@ QuadTreeNode* createQuadTreeNode(Bounds bounds, struct BoundarySegment* segment,
 void free_quadtree(QuadTreeNode* node);
 int segmentIntersectsBound(Bounds* bound, struct BoundarySegment* segment);
 int pointIntersectsBound(Point p, Bounds* bound);
+void query_region(QuadTreeNode* node, Bounds* region, struct BoundarySegment* results, int* count, int max_results);
 
-#define MAX_DEPTH 8
-#define MAX_SEGMENTS_PER_NODE 10
+#define MAX_DEPTH 10
+#define MAX_SEGMENTS_PER_NODE 30
 #endif
