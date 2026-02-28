@@ -1,12 +1,13 @@
 CC = gcc
-CFLAGS = -Iinclude -Wall -Wextra -std=c11
-LDFLAGS = -lm
+CFLAGS = -Iinclude -Wall -Wextra -std=c11 -I/opt/homebrew/include -Irenderer/include
+LDFLAGS = -lm -L/opt/homebrew/lib -lglfw -framework OpenGL
+COMMON_OBJS = track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o track_collision.o window.o glad.o
 
-simulator: main.o track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o track_collision.o
-	$(CC) -o simulator main.o track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o track_collision.o $(LDFLAGS)
+simulator: main.o $(COMMON_OBJS)
+	$(CC) -o simulator main.o $(COMMON_OBJS) $(LDFLAGS)
 
-test: test.o track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o track_collision.o
-	$(CC) -o test test.o track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o track_collision.o $(LDFLAGS)
+test: test.o $(COMMON_OBJS)
+	$(CC) -o test test.o $(COMMON_OBJS) $(LDFLAGS)
 
 main.o: src/main.c
 	$(CC) -c src/main.c $(CFLAGS)
@@ -33,7 +34,13 @@ util.o: src/util.c include/util.h
 	$(CC) -c src/util.c $(CFLAGS)
 
 track_collision.o: src/track_collision.c include/track_collision.h include/types.h include/car.h include/car_internals.h include/quad_tree.h
-		$(CC) -c src/track_collision.c $(CFLAGS)
+	$(CC) -c src/track_collision.c $(CFLAGS)
+	
+window.o: renderer/src/window.c renderer/include/window.h
+	$(CC) -c renderer/src/window.c $(CFLAGS)
+
+glad.o: src/glad.c include/glad.h
+	$(CC) -c src/glad.c $(CFLAGS)
 
 clean:
 	rm -f *.o simulator test
