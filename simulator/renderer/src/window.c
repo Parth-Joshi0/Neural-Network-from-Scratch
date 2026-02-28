@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 static GLFWwindow* window;
+static void framebuffer_size_callback(GLFWwindow* w, int width, int height);
 
 int window_init(int width, int height, const char* title) {
     if (glfwInit() == GLFW_FALSE) {
@@ -28,7 +29,15 @@ int window_init(int width, int height, const char* title) {
         return -1;
     }
 
+    glClearColor(0.1f, 0.2f, 0.2f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glfwSwapBuffers(window);
+
     glViewport(0, 0, width, height);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    int fb_width, fb_height;
+    glfwGetFramebufferSize(window, &fb_width, &fb_height);
+    glViewport(0, 0, fb_width, fb_height);
 
     return 0;
 }
@@ -45,4 +54,9 @@ void window_swap_and_poll(void) {
 void window_cleanup(void) {
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+static void framebuffer_size_callback(GLFWwindow* w, int width, int height) {
+    (void) w;
+    glViewport(0, 0, width, height);
 }
