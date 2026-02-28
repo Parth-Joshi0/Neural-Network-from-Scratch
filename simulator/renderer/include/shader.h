@@ -6,5 +6,6 @@
 GLuint shader_create(const char* vertex_file_path, const char* fragment_file_path);
 void shader_use(GLuint program_ID);
 void shader_clean_up(GLuint program_ID);
+GLint shader_get_uniform(GLuint program_ID, const char* name);
 
 #endif

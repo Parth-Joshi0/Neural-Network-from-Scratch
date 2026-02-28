@@ -1,5 +1,6 @@
 #include "window.h"
 #include "shader.h"
+#include "track_renderer.h"
 #include <stdio.h>
 
 int main(void) {
@@ -7,45 +8,26 @@ int main(void) {
         return 1;
     }
 
-    const char* fragFile = "renderer/shaders/basic.frag";
-    const char* vertexFile = "renderer/shaders/basic.vert";
-    GLuint program = shader_create(vertexFile, fragFile);
-    if (!program) {
-        fprintf(stderr, "Shader Error");
-        window_cleanup();
+    const char *filename = "tracks/track_001.txt";
+    Track *track = load_track(filename);
+    if (track == NULL) {
+        printf("Failed to load track: %s\n", filename);
         return 1;
     }
-
-    float verts[] = {-0.5, 0, 0, 0.5, 0.5, 0};
-
-    GLuint vao = 0, vbo = 0;
-
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    
+    if(track_renderer_init(&track->left_boundary, &track->right_boundary)) {
+        fprintf(stderr, "Failed to render Track \n");
+        return 1;
+    }
 
     while (!window_should_close()) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        shader_use(program);
-        glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
+        track_renderer_draw();
         window_swap_and_poll();
     }
 
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
-    shader_clean_up(program);
+    track_renderer_cleanup();
     window_cleanup();
 
     return 0;

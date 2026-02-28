@@ -98,3 +98,7 @@ void shader_use(GLuint program_ID) {
 void shader_clean_up(GLuint program_ID) {
     glDeleteProgram(program_ID);
 }
+
+GLint shader_get_uniform(GLuint program_ID, const char* name){
+    return glGetUniformLocation(program_ID, name);
+}
