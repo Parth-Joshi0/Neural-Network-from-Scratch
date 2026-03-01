@@ -8,7 +8,7 @@ static int right_points = 0;
 static GLuint shader = 0;
 static float transformation_matrix[16];
 
-void create_transformation_matrix(float M[16], float l, float r, float b, float t) {
+static void create_transformation_matrix(float M[16], float l, float r, float b, float t) {
     M[0]  =  2.0f / (r - l);
     M[1]  =  0.0f;
     M[2]  =  0.0f;

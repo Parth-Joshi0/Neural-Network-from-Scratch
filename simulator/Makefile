@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Iinclude -Wall -Wextra -std=c11 -I/opt/homebrew/include -Irenderer/include
 LDFLAGS = -lm -L/opt/homebrew/lib -lglfw -framework OpenGL
-COMMON_OBJS = track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o track_collision.o window.o glad.o shader.o track_renderer.o
+COMMON_OBJS = track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o track_collision.o window.o glad.o shader.o track_renderer.o car_renderer.o
 
 simulator: main.o $(COMMON_OBJS)
 	$(CC) -o simulator main.o $(COMMON_OBJS) $(LDFLAGS)
@@ -45,8 +45,11 @@ glad.o: src/glad.c include/glad.h
 shader.o: renderer/src/shader.c renderer/include/shader.h include/glad.h
 	$(CC) -c renderer/src/shader.c $(CFLAGS)
 
-track_renderer.o: renderer/src/track_renderer.c renderer/include/track_renderer.h renderer/include/shader.h include/glad.h
+track_renderer.o: renderer/src/track_renderer.c renderer/include/track_renderer.h renderer/include/shader.h include/glad.h include/track_internals.h
 	$(CC) -c renderer/src/track_renderer.c $(CFLAGS)
+
+car_renderer.o: renderer/src/car_renderer.c renderer/include/car_renderer.h renderer/include/shader.h include/glad.h include/car_internals.h
+	$(CC) -c renderer/src/car_renderer.c $(CFLAGS)
 
 clean:
 	rm -f *.o simulator test
