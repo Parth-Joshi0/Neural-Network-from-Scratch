@@ -9,6 +9,7 @@
 #include "quad_tree.h"
 #include "util.h"
 #include <stdlib.h>
+#include "track_collision.h"
 
 #define TEST_CAR_COUNT 1
 
@@ -62,7 +63,7 @@ int main(void) {
     }
 
 
-    while (!window_should_close()) {
+    while (!window_should_close() && cars[0]->is_alive == true) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -70,9 +71,15 @@ int main(void) {
 
         car_renderer_update(TEST_CAR_COUNT, cars);
         car_renderer_draw();
+
         track_renderer_draw();
+
         ray_renderer_update(cars[0]);
         ray_renderer_draw();
+        
+        move_cars(cars, TEST_CAR_COUNT);
+
+        check_car_collision(cars[0], tree);
 
         window_swap_and_poll();
     }
@@ -122,7 +129,7 @@ void free_test_cars(Car* cars[], int count) {
 void move_cars(Car* cars[], int count) {
     for (int i = 0; i < count; i++) {
         if (cars[i] != NULL) {
-            update_car_physics(cars[i], 1.0f, 0.01f, 0.01f);
+            update_car_physics(cars[i], 1.0f, 0.00f, 0.01f);
         }
     }
 }
