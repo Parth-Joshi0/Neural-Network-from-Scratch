@@ -12,7 +12,7 @@ test: test.o $(COMMON_OBJS)
 main.o: src/main.c
 	$(CC) -c src/main.c $(CFLAGS)
 
-test.o: src/test.c include/util.h include/track_internals.h include/car.h include/physics.h include/ray_cast.h include/quad_tree.h
+test.o: src/test.c $(COMMON_OBJS)
 	$(CC) -c src/test.c $(CFLAGS)
 
 track_loader.o: src/track_loader.c include/track_loader.h include/track_internals.h include/types.h include/util.h

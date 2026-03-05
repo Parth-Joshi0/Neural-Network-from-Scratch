@@ -167,3 +167,37 @@ void query_region(QuadTreeNode* node, Bounds* region, struct BoundarySegment* re
 
     return;
 }
+
+QuadTreeNode* build_track_quadtree(Track* track) {
+    // Combine left and right boundary segments
+    int total_segments = track->num_boundary_segments * 2;
+    struct BoundarySegment* all_segments = xalloc(total_segments, sizeof(struct BoundarySegment));
+    
+    // Copy left boundary segments
+    for (int i = 0; i < track->num_boundary_segments; i++) {
+        all_segments[i] = track->left_boundary_segments[i];
+    }
+    
+    // Copy right boundary segments
+    for (int i = 0; i < track->num_boundary_segments; i++) {
+        all_segments[track->num_boundary_segments + i] = track->right_boundary_segments[i];
+    }
+    
+    // Calculate bounds from all points
+    Point* all_points = xalloc((track->left_boundary.count + track->right_boundary.count), sizeof(Point));
+    for (int i = 0; i < track->left_boundary.count; i++) {
+        all_points[i] = track->left_boundary.points[i];
+    }
+    for (int i = 0; i < track->right_boundary.count; i++) {
+        all_points[track->left_boundary.count + i] = track->right_boundary.points[i];
+    }
+    
+    Bounds bounds = calculateBounds(all_points, track->left_boundary.count + track->right_boundary.count);
+    free(all_points);
+    
+    // Build the quad tree
+    QuadTreeNode* tree = createQuadTreeNode(bounds, all_segments, total_segments, 0);
+    free(all_segments);
+    
+    return tree;
+}
