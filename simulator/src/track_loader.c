@@ -162,11 +162,13 @@ static void track_create_segments(Track *track) {
 static void track_calculate_lengths(Track *track) {
     track->cumulative_length = xalloc(track->left_boundary.count, sizeof(float));
     track->cumulative_length[0] = 0.0f;  // Start is at distance 0
+    track->total_length = 0;
     for (int i = 1; i < track->left_boundary.count; i++) {
         float dx = track->left_boundary.points[i].x - track->left_boundary.points[i-1].x;
         float dy = track->left_boundary.points[i].y - track->left_boundary.points[i-1].y;
         float dist = sqrtf(dx*dx + dy*dy);
         track->cumulative_length[i] = track->cumulative_length[i-1] + dist;
+        track->total_length += dist;
     }
 }
 
