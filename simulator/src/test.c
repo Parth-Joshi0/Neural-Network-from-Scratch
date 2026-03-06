@@ -25,8 +25,8 @@ int main(void) {
         return 1;
     }
     printf("  Track loaded successfully\n");
-    printf("  Track width: %.2f\n", track_width(track));
-    printf("  Total length: %.2f\n", track_total_length(track));
+    printf("  Track width: %.2f\n", track->width);
+    printf("  Total length: %.2f\n", track->total_length);
     printf("  Left boundary points: %d\n", track->left_boundary.count);
     printf("  Right boundary points: %d\n", track->right_boundary.count);
     printf("  Boundary segments: %d\n", track->num_boundary_segments);

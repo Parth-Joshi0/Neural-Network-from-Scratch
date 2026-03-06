@@ -180,11 +180,3 @@ void free_track(Track *track) {
         free(track);
     }
 }
-
-float track_width(const Track *t) {
-    return t->width;
-}
-
-float track_total_length(const Track *t) {
-    return t->cumulative_length[t->left_boundary.count - 1];
-}
