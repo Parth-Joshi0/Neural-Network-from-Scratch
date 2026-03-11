@@ -130,7 +130,7 @@ void query_region(QuadTreeNode* node, Bounds* region, struct BoundarySegment* re
         return;
     }
 
-    if (node->children[0] == NULL) {
+    if (node->segment_count > 0) {
         // Leaf Node
         for (int i = 0; i < node->segment_count; i++) {
             struct BoundarySegment segment = node->segments[i];

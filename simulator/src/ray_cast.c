@@ -92,7 +92,7 @@ RayHit cast_ray(QuadTreeNode* node, Point origin, float direction, float max_dis
         return result;
     }
 
-    if (node->children[0] == NULL) {
+    if (node->segment_count > 0) {
         // Leaf Node
         for (int i = 0; i < node->segment_count; i++) {
             RayHit hit = ray_segment_intersection(origin, direction, &node->segments[i]);
