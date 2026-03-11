@@ -13,4 +13,6 @@ typedef struct {
 RayHit cast_ray(QuadTreeNode* node, Point origin, float direction, float max_distance);
 extern const float RAY_ANGLES[NUM_RAYS];
 
+#define MAX_RAY_DISTANCE 10.0f
+
 #endif

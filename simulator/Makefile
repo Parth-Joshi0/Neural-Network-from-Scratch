@@ -2,6 +2,13 @@ CC = gcc
 CFLAGS = -Iinclude -Wall -Wextra -std=c11 -I/opt/homebrew/include -Irenderer/include
 LDFLAGS = -lm -L/opt/homebrew/lib -lglfw -framework OpenGL
 COMMON_OBJS = track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o track_collision.o window.o glad.o shader.o track_renderer.o car_renderer.o ray_renderer.o
+SIM_LIB_OBJS = sim_lib.o track_loader.o car.o physics.o quad_tree.o ray_cast.o util.o track_collision.o
+
+sim_lib: $(SIM_LIB_OBJS)
+	$(CC) -dynamiclib -o libsimulator.dylib $(SIM_LIB_OBJS) -lm
+
+test_lib: test_lib.o $(SIM_LIB_OBJS)
+	$(CC) -o test_lib test_lib.o $(SIM_LIB_OBJS) -lm
 
 simulator: main.o $(COMMON_OBJS)
 	$(CC) -o simulator main.o $(COMMON_OBJS) $(LDFLAGS)
@@ -53,6 +60,12 @@ car_renderer.o: renderer/src/car_renderer.c renderer/include/car_renderer.h rend
 
 ray_renderer.o: renderer/src/ray_renderer.c renderer/include/ray_renderer.h renderer/include/shader.h include/glad.h include/car_internals.h
 	$(CC) -c renderer/src/ray_renderer.c $(CFLAGS)
+
+sim_lib.o: src/sim_lib.c include/sim_lib.h
+	$(CC) -c src/sim_lib.c $(CFLAGS) -fPIC
+
+test_lib.o: src/test_lib.c
+	$(CC) -c src/test_lib.c $(CFLAGS)
 
 clean:
 	rm -f *.o simulator test

@@ -135,6 +135,6 @@ void move_cars(Car* cars[], int count) {
 
 void cast_rays(Car* car[]) {
     for (int j = 0; j < NUM_RAYS; j++) {
-        car[0]->ray_distances[j] = cast_ray(tree, car[0]->position,car[0]->heading + RAY_ANGLES[j], 10.0f).distance;
+        car[0]->ray_distances[j] = cast_ray(tree, car[0]->position,car[0]->heading + RAY_ANGLES[j], MAX_RAY_DISTANCE).distance;
     }
 }
