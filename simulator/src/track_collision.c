@@ -144,7 +144,7 @@ static inline float distance_to_point_segment_sq(float seg_dx, float seg_dy, Poi
 
 static inline int corner_is_on_wrong_side(Point corner, const struct BoundarySegment* seg) {
     if (seg == NULL) {
-        return 1;
+        return 0;
     }
 
     // Vector from segment start to corner
