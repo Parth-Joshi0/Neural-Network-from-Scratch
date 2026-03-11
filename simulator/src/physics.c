@@ -47,8 +47,13 @@ void update_car_physics(Car *car, float acceleration, float steering_angle, cons
     car->heading += car->angular_velocity * dt;
     normalize_heading(&car->heading);
 
+    float prev_x_pos = car->position.x;
+    float prev_y_pos = car->position.y;
+
     car->position.x += car->velocity.x * dt;
     car->position.y += car->velocity.y * dt;
+
+    car->total_distance_traveled += fabsf(car->position.x - prev_x_pos) + fabsf(car->position.y - prev_y_pos);
 
     car->time_alive += dt;
     
