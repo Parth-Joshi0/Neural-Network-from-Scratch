@@ -8,6 +8,8 @@ RayHit ray_segment_intersection(Point origin, float direction, struct BoundarySe
 int ray_intersects_bounds(Point origin, float direction, Bounds* bounds, float max_distance);
 RayHit cast_ray(QuadTreeNode* node, Point origin, float direction, float max_distance);
 
+const float RAY_ANGLES[NUM_RAYS] = {-1.308996939, -0.785398163397, -0.436332312999, -0.174532925199, 0, 0.174532925199, 0.436332312999, 0.785398163397, 1.308996939};
+
 RayHit ray_segment_intersection(Point origin, float direction, struct BoundarySegment* segment) {
     RayHit result = {.hit = 0, .distance = FLT_MAX};
 

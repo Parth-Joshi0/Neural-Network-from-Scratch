@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <math.h>
 #include "util.h"
+#include "ray_cast.h"
 
 static GLuint vao = 0, vbo = 0;
 static GLuint shader = 0;
 static float transformation_matrix[16];
 static float ray_array[4 * NUM_RAYS];
-static float ray_angles[NUM_RAYS] = {-1.308996939, -0.785398163397, -0.436332312999, -0.174532925199, 0, 0.174532925199, 0.436332312999, 0.785398163397, 1.308996939};
 
 int ray_renderer_init() {
     create_transformation_matrix(transformation_matrix, 0, 100, 0, 100);
@@ -39,8 +39,8 @@ int ray_renderer_init() {
 void ray_renderer_update(Car* car) {
 
     for (int j = 0; j < NUM_RAYS; j++) {
-        float end_x = car->position.x + car->ray_distances[j] * cosf(car->heading + ray_angles[j]);
-        float end_y = car->position.y + car->ray_distances[j] * sinf(car->heading + ray_angles[j]);
+        float end_x = car->position.x + car->ray_distances[j] * cosf(car->heading + RAY_ANGLES[j]);
+        float end_y = car->position.y + car->ray_distances[j] * sinf(car->heading + RAY_ANGLES[j]);
         ray_array[j*4] = car->position.x;
         ray_array[j*4 + 1] = car->position.y;
         ray_array[j*4 + 2] = end_x;

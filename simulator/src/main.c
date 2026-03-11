@@ -20,7 +20,6 @@ void cast_rays(Car* car[]);
 QuadTreeNode* build_track_quadtree(Track* track);
 
 static QuadTreeNode* tree;
-static float ray_angles[NUM_RAYS] = {-1.308996939, -0.785398163397, -0.436332312999, -0.174532925199, 0, 0.174532925199, 0.436332312999, 0.785398163397, 1.308996939};
 
 int main(void) {
     
@@ -136,6 +135,6 @@ void move_cars(Car* cars[], int count) {
 
 void cast_rays(Car* car[]) {
     for (int j = 0; j < NUM_RAYS; j++) {
-        car[0]->ray_distances[j] = cast_ray(tree, car[0]->position,car[0]->heading + ray_angles[j], 10.0f).distance;
+        car[0]->ray_distances[j] = cast_ray(tree, car[0]->position,car[0]->heading + RAY_ANGLES[j], 10.0f).distance;
     }
 }
