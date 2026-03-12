@@ -2,7 +2,7 @@
 #include "sim_lib.h"
 
 #define NUM_STATE 12
-#define NUM_TEST_STEPS 20
+#define NUM_TEST_STEPS 100
 
 static void print_state(float* state) {
     printf("  Rays:     %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f\n",
@@ -17,7 +17,7 @@ int main(void) {
     // --- 1. Init ---
     printf("=== sim_init ===\n");
     // TODO: Replace with your actual track path and start position/heading
-    int ok = sim_init("tracks/track_001.txt", 13.0f, 12.3f, 0.0f);
+    int ok = sim_init("tracks/test2.txt", 8.0f, 9.3f, 0.0f);
     if (ok != 0) {
         printf("FAIL: sim_init returned %d\n", ok);
         return 1;

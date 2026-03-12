@@ -27,7 +27,7 @@ int main(void) {
         return 1;
     }
 
-    const char *filename = "tracks/track_001.txt";
+    const char *filename = "tracks/test2.txt";
     Track *track = load_track(filename);
     if (track == NULL) {
         printf("Failed to load track: %s\n", filename);
@@ -62,7 +62,7 @@ int main(void) {
     }
 
 
-    while (!window_should_close() && cars[0]->is_alive == true) {
+    while (!window_should_close() && (cars[0]->is_alive == true)) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -96,7 +96,7 @@ int main(void) {
 
 void spawn_test_cars(Car* cars[TEST_CAR_COUNT]) {
     Point starts[TEST_CAR_COUNT] = {
-        {13.0f, 12.3f},
+        {8.0f, 9.3f},
         //{20.0f, 18.0f},
         //{35.5f, 40.2f},
         //{50.0f, 10.0f},
