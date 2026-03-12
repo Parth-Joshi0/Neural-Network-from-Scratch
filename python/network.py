@@ -32,19 +32,21 @@ class NeuralNetwork:
 
         return a3, cache
 
-    def backward(self, cache: dict, target) -> dict:
+    def backward(self, cache, target=None, G=None, action=None, mode='policy') -> dict:
         a0 = cache['a0']
         z1, a1 = cache['z1'], cache['a1']
         z2, a2 = cache['z2'], cache['a2']
         z3, a3 = cache['z3'], cache['a3']
 
-        target = np.asarray(target, dtype=np.float32)
-
-        # Number of output units
-        n = target.shape[0]
-
-        # Output layer
-        dL_da3 = 2 * (a3 - target) / n
+        dL_da3 = None
+        if mode == 'mse':
+            target = np.asarray(target, dtype=np.float32)
+            # Number of output units
+            n = target.shape[0]
+            # Output layer
+            dL_da3 = 2 * (a3 - target) / n
+        else:
+            dL_da3 = -G * (action - a3) / (self.sigma ** 2)
         dL_dz3 = dL_da3 * (1 - a3 ** 2)
 
         dL_dW3 = np.outer(dL_dz3, a2)
@@ -90,3 +92,11 @@ class NeuralNetwork:
         logp -= np.log(np.sqrt(2 * np.pi))
 
         return np.sum(logp)
+
+    def update(self, grads, lr):
+        self.w1 -= lr * grads['w1']
+        self.b1 -= lr * grads['b1']
+        self.w2 -= lr * grads['w2']
+        self.b2 -= lr * grads['b2']
+        self.w3 -= lr * grads['w3']
+        self.b3 -= lr * grads['b3']
