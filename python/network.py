@@ -11,6 +11,8 @@ class NeuralNetwork:
         self.b2 = np.zeros(16).astype(np.float32)
         self.b3 = np.zeros(2).astype(np.float32)
 
+        self.sigma = 0.5
+
     def forward(self, x) -> tuple[np.ndarray, dict]:
         z1 = self.w1 @ x + self.b1
         a1 = np.tanh(z1)
@@ -30,7 +32,7 @@ class NeuralNetwork:
 
         return a3, cache
 
-    def backward(self, cache: dict, target):
+    def backward(self, cache: dict, target) -> dict:
         a0 = cache['a0']
         z1, a1 = cache['z1'], cache['a1']
         z2, a2 = cache['z2'], cache['a2']
@@ -72,3 +74,19 @@ class NeuralNetwork:
         }
 
         return grads
+
+    def sample_action(self, state) -> tuple[np.ndarray, float]:
+        mu, cache = self.forward(state)
+        noise = np.random.randn(2)
+        raw_action = mu + self.sigma * noise
+        action = np.clip(raw_action, -1, 1)
+        logp = self.log_pi(raw_action, mu)
+        return action, logp
+
+    def log_pi(self, action, mu):
+        var = self.sigma ** 2
+        logp = -((action - mu) ** 2) / (2 * var)
+        logp -= np.log(self.sigma)
+        logp -= np.log(np.sqrt(2 * np.pi))
+
+        return np.sum(logp)
