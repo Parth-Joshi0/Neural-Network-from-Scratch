@@ -50,7 +50,7 @@ void sim_reset(float* state_out) {
 }
 
 void sim_step(float delta_accel, float delta_steering, float* state_out, float* reward_out, int* alive_out, int* success_out) {
-    update_car_physics(car, delta_accel + car->acceleration, delta_steering + car->steering_angle, 0.1f);
+    update_car_physics(car, delta_accel + car->acceleration, delta_steering + car->steering_angle, 0.01f);
     cast_rays();
     check_car_collision(car, tree);
 

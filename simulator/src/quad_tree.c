@@ -170,17 +170,19 @@ void query_region(QuadTreeNode* node, Bounds* region, struct BoundarySegment* re
 
 QuadTreeNode* build_track_quadtree(Track* track) {
     // Combine left and right boundary segments
-    int total_segments = track->num_boundary_segments * 2;
+    int left_count = track->left_boundary.count - 1;
+    int right_count = track->right_boundary.count - 1;
+    int total_segments = track->num_boundary_segments; // already = left_count + right_count
     struct BoundarySegment* all_segments = xalloc(total_segments, sizeof(struct BoundarySegment));
-    
+
     // Copy left boundary segments
-    for (int i = 0; i < track->num_boundary_segments; i++) {
+    for (int i = 0; i < left_count; i++) {
         all_segments[i] = track->left_boundary_segments[i];
     }
-    
+
     // Copy right boundary segments
-    for (int i = 0; i < track->num_boundary_segments; i++) {
-        all_segments[track->num_boundary_segments + i] = track->right_boundary_segments[i];
+    for (int i = 0; i < right_count; i++) {
+        all_segments[left_count + i] = track->right_boundary_segments[i];
     }
     
     // Calculate bounds from all points
