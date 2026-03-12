@@ -38,7 +38,6 @@ int sim_init(const char* track_filename, float car_start_x, float car_start_y, f
     return 0;
 }
 
-
 void sim_reset(float* state_out) {
     reset_car(car, start_point, start_heading);
     cast_rays();
