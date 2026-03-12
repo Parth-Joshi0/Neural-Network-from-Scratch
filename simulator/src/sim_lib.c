@@ -77,7 +77,13 @@ void sim_step(float delta_accel, float delta_steering, float* state_out, float* 
         car->is_alive = false;
     }
     *alive_out = car->is_alive;
-    *success_out = (car->furthest_point_index >= track->left_boundary.count - 2);
+    Point finish_pt   = track->left_boundary.points[track->left_boundary.count - 1];
+    Point finish_prev = track->left_boundary.points[track->left_boundary.count - 2];
+    float dir_x = finish_pt.x - finish_prev.x;
+    float dir_y = finish_pt.y - finish_prev.y;
+    float to_car_x = car->position.x - finish_pt.x;
+    float to_car_y = car->position.y - finish_pt.y;
+    *success_out = (to_car_x * dir_x + to_car_y * dir_y) >= 0.0f;
 }
 
 void sim_get_state(float* state_out) {

@@ -79,7 +79,14 @@ int main(void) {
     }
 
     while (!window_should_close()) {
-        if (!car->is_alive) {
+        Point finish_pt   = track->left_boundary.points[track->left_boundary.count - 1];
+        Point finish_prev = track->left_boundary.points[track->left_boundary.count - 2];
+        float dir_x = finish_pt.x - finish_prev.x;
+        float dir_y = finish_pt.y - finish_prev.y;
+        float to_car_x = car->position.x - finish_pt.x;
+        float to_car_y = car->position.y - finish_pt.y;
+        int success = (to_car_x * dir_x + to_car_y * dir_y) >= 0.0f;
+        if (!car->is_alive || success) {
             reset_car(car, START_POINT, START_HEADING);
         }
 
