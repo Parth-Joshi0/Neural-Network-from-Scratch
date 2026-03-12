@@ -1,69 +1,133 @@
 # Neural Network from Scratch
 
-A hands-on implementation of a neural network built from the ground up, designed as a learning project to deepen understanding of both neural network fundamentals and programming language capabilities.
+A self-driving car trained using reinforcement learning (REINFORCE / policy gradient), built entirely from scratch — no ML frameworks, no physics engines, no game engines.
 
-## Project Goals
+The car learns to drive around a track by receiving distance sensor readings and outputting steering and acceleration adjustments. The physics simulation and rendering are implemented in C; training is done in Python using only NumPy.
 
-This project serves as an educational journey to:
-- **Understand Neural Networks**: Build intuition about how neural networks actually work by implementing core algorithms from scratch
-- **Master Programming Languages**: Strengthen proficiency in the chosen programming languages through practical application
-- **Learn by Building**: Gain deep insights that come only from implementing complex systems without relying on high-level libraries
+## Demo
 
-## Current Status
+The trained car navigates a track using 9 ray-cast sensors:
 
-**Work in Progress** - Currently developing the track builder component for the simulator using bezier curves.
+```
+[ray distances × 9] + speed + acceleration + steering_angle
+                          ↓
+                   Neural Network (12→24→16→2)
+                          ↓
+              [Δacceleration, Δsteering_angle]
+```
 
-### Project Structure
+## Project Structure
 
 ```
 Neural-Network-from-Scratch/
-└── simulator/
-    ├── track_drawer/
-    └── tracks/
+├── python/                   # Training code
+│   ├── network.py            # Pure NumPy neural network (forward + backprop)
+│   ├── train.py              # REINFORCE training loop
+│   ├── simulator.py          # Python ctypes wrapper for the C simulator
+│   ├── utils.py              # Discounted returns computation
+│   ├── file_save.py          # Export trained weights to binary for C
+│   ├── best_weights.npy      # Best saved weights (NumPy format)
+│   └── weights.bin           # Exported weights (C-readable binary)
+└── simulator/                # C physics engine + OpenGL visualizer
+    ├── src/                  # C source files
+    ├── include/              # C headers
+    ├── renderer/             # OpenGL rendering (window, shaders, car/track/ray)
+    ├── tracks/               # Track definition files (.txt)
+    ├── track_drawer/         # Python tool for drawing custom tracks
+    ├── Makefile              # Build system
+    └── libsimulator.dylib    # Shared library used by Python training
 ```
 
-## Components
+## How It Works
 
-### Simulator
-The neural network training and visualization environment.
+### Training (Python)
+1. The Python `Simulator` class loads `libsimulator.dylib` via ctypes
+2. Each episode: the network samples actions from a Gaussian policy, runs a full episode, and collects the trajectory
+3. Discounted returns are computed and normalized, then a REINFORCE gradient update is applied
+4. Exploration noise (`sigma`) decays over time from 1.0 → 0.2
+5. Best weights (by 10-episode average reward) are saved to `best_weights.npy`
+6. `file_save.py` exports those weights to `weights.bin` for use by the C visualizer
 
-- **track_drawer/** - Tool for creating custom track layouts
-- **tracks/** - Collection of training tracks
+### Visualization (C)
+The standalone `simulator` binary loads `weights.bin`, runs the trained network in real time, and renders the car driving around the track using OpenGL.
 
-## Technologies
+### Reward
+- Each step: reward = forward progress along the track
+- Episode end (success): +1000 bonus
+- Episode ends on collision or going off-track
 
-_[To be added as development progresses]_
+## Neural Network
 
-## Learning Resources
+- **Architecture**: 3 fully-connected layers — `12 → 24 → 16 → 2`
+- **Activations**: tanh on all layers
+- **Inputs (12)**: 9 normalized ray distances + speed + acceleration + steering angle
+- **Outputs (2)**: Δacceleration, Δsteering angle
+- **Algorithm**: REINFORCE with Gaussian policy and entropy via sigma decay
+- **Optimizer**: Vanilla SGD with gradient clipping (±1.0)
 
-This project is inspired by the desire to understand:
-- Forward and backward propagation
-- Gradient descent and optimization
-- Activation functions
-- Network architecture design
-- Training and evaluation processes
+## Physics Constants
+
+| Parameter | Value |
+|---|---|
+| Max forward speed | 5.0 m/s |
+| Max acceleration | 1.0 m/s² |
+| Max steering angle | ±30° |
+| Ray count | 9 |
+| Max ray distance | 10.0 m |
+| Timestep (dt) | 0.01 s |
+
+Ray angles (radians): `±75°, ±45°, ±25°, ±10°, 0°`
 
 ## Getting Started
 
-_[Setup instructions will be added as the project develops]_
+### Prerequisites
 
-## Development Log
+- macOS (uses `.dylib` shared library format)
+- Python 3.10+, NumPy
+- GCC, GLFW, OpenGL (for the C simulator)
 
-- **Current**: Building track builder for simulator
-- **Next**: [To be determined]
+```bash
+brew install glfw
+```
 
-## Contributing
+### Build the C Simulator
 
-This is a personal learning project, but suggestions and feedback are welcome!
+```bash
+cd simulator
+make sim_lib      # Build libsimulator.dylib (used by Python training)
+make simulator    # Build the OpenGL visualizer
+```
 
-## License
+### Train
 
-_[To be added]_
+```bash
+cd python
+python train.py
+```
+
+Prints episode rewards, average over last 10 episodes, step count, and sigma each 10 episodes.
+
+### Export Weights and Visualize
+
+```bash
+cd python
+python file_save.py      # Exports best_weights.npy → weights.bin
+
+cd ../simulator
+./simulator              # Runs the trained car in the OpenGL window
+```
+
+## Technologies
+
+| Layer | Technology |
+|---|---|
+| Neural network | Pure NumPy (no PyTorch/TF) |
+| Physics + collision | C (from scratch) |
+| Spatial indexing | Quad-tree (C) |
+| Rendering | OpenGL + GLFW (C) |
+| Python/C bridge | ctypes |
+| Track format | Custom .txt with Bézier-sampled boundaries |
 
 ## Acknowledgments
 
-Built with the goal of truly understanding neural networks from the ground up, one line of code at a time. Inspired from Green Code on youtube
-
----
-
-*This project is a work in progress and will be updated regularly as development continues.*
+Inspired by [Green Code on YouTube](https://www.youtube.com/@GreenCode). Built to understand every layer of how a self-driving agent actually works, from physics integration to policy gradient math.
