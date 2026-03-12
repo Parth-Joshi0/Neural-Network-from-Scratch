@@ -16,6 +16,7 @@ static Car* car = NULL;
 static Point start_point;
 static float start_heading;
 static float prev_distance_traveled;
+static int prev_furthest_point_index = 0;
 
 static void cast_rays();
 static void update_furthest_point_index();
@@ -35,6 +36,7 @@ int sim_init(const char* track_filename, float car_start_x, float car_start_y, f
     car = create_car(start_point, start_heading);
     cast_rays();
     prev_distance_traveled = 0;
+    prev_furthest_point_index = 0;
     return 0;
 }
 
@@ -42,6 +44,7 @@ void sim_reset(float* state_out) {
     reset_car(car, start_point, start_heading);
     cast_rays();
     prev_distance_traveled = 0;
+    prev_furthest_point_index = 0;
     for (int i = 0; i < 9; i++) {
         state_out[i] = car->ray_distances[i] / MAX_RAY_DISTANCE;
     }
@@ -63,7 +66,7 @@ void sim_step(float delta_accel, float delta_steering, float* state_out, float* 
     state_out[10] = car->acceleration / MAX_ACCELERATION;
     state_out[11] = car->steering_angle / MAX_STEERING_ANGLE;
 
-    *reward_out = car->total_distance_traveled - prev_distance_traveled;
+    *reward_out = track->cumulative_length[car->furthest_point_index] - track->cumulative_length[prev_furthest_point_index];
     prev_distance_traveled = car->total_distance_traveled;
     *alive_out = car->is_alive;
     *success_out = (car->furthest_point_index >= track->left_boundary.count - 2);
@@ -91,6 +94,7 @@ static void cast_rays() {
 }
 
 static void update_furthest_point_index() {
+    prev_furthest_point_index = car->furthest_point_index;
     float padding = 5.0f;
     Bounds query_bounds = {
         car->position.x - padding,
