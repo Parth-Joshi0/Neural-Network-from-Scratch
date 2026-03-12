@@ -31,7 +31,7 @@ for episode in range(num_episodes):
 
     rewards = [r for _, r, _, _ in trajectory]
     if success:
-        rewards += 10
+        rewards.append(10)
     returns = compute_returns(rewards, gamma)
 
     mean, std = returns.mean(), returns.std()
