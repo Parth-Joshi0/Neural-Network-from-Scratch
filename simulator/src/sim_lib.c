@@ -10,6 +10,8 @@
 #include "physics_constants.h"
 #include "track_internals.h"
 
+#define MAX_SIM_STEPS 500
+
 static Track* track = NULL;
 static QuadTreeNode* tree = NULL;
 static Car* car = NULL;
@@ -17,6 +19,7 @@ static Point start_point;
 static float start_heading;
 static float prev_distance_traveled;
 static int prev_furthest_point_index = 0;
+static int sim_num = 0;
 
 static void cast_rays();
 static void update_furthest_point_index();
@@ -45,6 +48,7 @@ void sim_reset(float* state_out) {
     cast_rays();
     prev_distance_traveled = 0;
     prev_furthest_point_index = 0;
+    sim_num = 0;
     for (int i = 0; i < 9; i++) {
         state_out[i] = car->ray_distances[i] / MAX_RAY_DISTANCE;
     }
@@ -54,6 +58,7 @@ void sim_reset(float* state_out) {
 }
 
 void sim_step(float delta_accel, float delta_steering, float* state_out, float* reward_out, int* alive_out, int* success_out) {
+    sim_num++;
     update_car_physics(car, delta_accel + car->acceleration, delta_steering + car->steering_angle, 1.0f);
     cast_rays();
     check_car_collision(car, tree);
@@ -66,8 +71,11 @@ void sim_step(float delta_accel, float delta_steering, float* state_out, float* 
     state_out[10] = car->acceleration / MAX_ACCELERATION;
     state_out[11] = car->steering_angle / MAX_STEERING_ANGLE;
 
-    *reward_out = track->cumulative_length[car->furthest_point_index] - track->cumulative_length[prev_furthest_point_index];
+    *reward_out = track->cumulative_length[car->furthest_point_index] - track->cumulative_length[prev_furthest_point_index] - (sim_num * 0.0001f);
     prev_distance_traveled = car->total_distance_traveled;
+    if (sim_num >= MAX_SIM_STEPS) {
+        car->is_alive = false;
+    }
     *alive_out = car->is_alive;
     *success_out = (car->furthest_point_index >= track->left_boundary.count - 2);
 }
