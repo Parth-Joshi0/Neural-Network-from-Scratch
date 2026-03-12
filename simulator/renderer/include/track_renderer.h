@@ -5,7 +5,7 @@
 #include "shader.h"
 #include "glad.h"
 
-int track_renderer_init(Boundary* left, Boundary* right);
+int track_renderer_init(Boundary* left, Boundary* right, struct BoundarySegment* start_seg);
 void track_renderer_draw();
 void track_renderer_cleanup();
 

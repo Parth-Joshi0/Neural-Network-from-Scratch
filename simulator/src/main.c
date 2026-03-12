@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "window.h"
 #include "shader.h"
 #include "track_renderer.h"
@@ -15,7 +16,7 @@
 
 #define DT 0.01f
 
-static const Point  START_POINT   = {.x = 8.0f, .y = 9.3f};
+static const Point  START_POINT   = {.x = 12.5f, .y = 16.1f};
 static const float  START_HEADING = 0.0f;
 static QuadTreeNode* tree;
 
@@ -27,7 +28,7 @@ int main(void) {
         return 1;
     }
 
-    const char* filename = "tracks/test2.txt";
+    const char* filename = "tracks/track_001.txt";
     Track* track = load_track(filename);
     if (track == NULL) {
         fprintf(stderr, "Failed to load track: %s\n", filename);
@@ -35,7 +36,7 @@ int main(void) {
         return 1;
     }
 
-    if (track_renderer_init(&track->left_boundary, &track->right_boundary)) {
+    if (track_renderer_init(&track->left_boundary, &track->right_boundary, &track->start_segment)) {
         fprintf(stderr, "Failed to init track renderer\n");
         free_track(track);
         window_cleanup();
@@ -85,7 +86,12 @@ int main(void) {
         float dir_y = finish_pt.y - finish_prev.y;
         float to_car_x = car->position.x - finish_pt.x;
         float to_car_y = car->position.y - finish_pt.y;
-        int success = (to_car_x * dir_x + to_car_y * dir_y) >= 0.0f;
+        float len = sqrtf(dir_x * dir_x + dir_y * dir_y);
+        float norm_x = dir_x / len;
+        float norm_y = dir_y / len;
+        float forward = to_car_x * norm_x + to_car_y * norm_y;
+        float lateral = to_car_x * (-norm_y) + to_car_y * norm_x;
+        int success = forward >= 0.0f && fabsf(lateral) < 5.0f;
         if (!car->is_alive || success) {
             reset_car(car, START_POINT, START_HEADING);
         }

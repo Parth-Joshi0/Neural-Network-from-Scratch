@@ -113,6 +113,18 @@ int check_car_collision(Car* car, QuadTreeNode* node) {
         return 0;
     }
 
+    // Check start boundary segment
+    for (int i = 0; i < count; i++) {
+        if (results[i].type == BOUNDARY_START) {
+            for (int c = 0; c < 4; c++) {
+                if (corner_is_on_wrong_side(corners[c], &results[i])) {
+                    car->is_alive = false;
+                    return 0;
+                }
+            }
+        }
+    }
+
     return 1;
 }
 

@@ -4,12 +4,13 @@
 
 static GLuint leftVAO = 0, leftVBO = 0;
 static GLuint rightVAO = 0, rightVBO = 0;
+static GLuint startVAO = 0, startVBO = 0;
 static int left_points = 0;
 static int right_points = 0;
 static GLuint shader = 0;
 static float transformation_matrix[16];
 
-int track_renderer_init(Boundary* left, Boundary* right) {
+int track_renderer_init(Boundary* left, Boundary* right, struct BoundarySegment* start_seg) {
     create_transformation_matrix(transformation_matrix, 0, 100, 0, 100);
 
     left_points = left->count;
@@ -44,9 +45,26 @@ int track_renderer_init(Boundary* left, Boundary* right) {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    // Start boundary segment (two points: start and end)
+    float start_pts[4] = {
+        start_seg->start.x, start_seg->start.y,
+        start_seg->end.x,   start_seg->end.y
+    };
+
+    glGenVertexArrays(1, &startVAO);
+    glBindVertexArray(startVAO);
+
+    glGenBuffers(1, &startVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, startVBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(start_pts), start_pts, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-  
+
     return 0;
 }
 
@@ -65,6 +83,11 @@ void track_renderer_draw() {
     glBindVertexArray(rightVAO);
     glDrawArrays(GL_LINE_STRIP, 0, right_points);
 
+    // Draw start boundary in red
+    glUniform3f(colourLoc, 1.0f, 0.0f, 0.0f);
+    glBindVertexArray(startVAO);
+    glDrawArrays(GL_LINES, 0, 2);
+
 }
 
 void track_renderer_cleanup() {
@@ -73,5 +96,7 @@ void track_renderer_cleanup() {
     glDeleteBuffers(1, &leftVBO);
     glDeleteVertexArrays(1, &rightVAO);
     glDeleteBuffers(1, &rightVBO);
+    glDeleteVertexArrays(1, &startVAO);
+    glDeleteBuffers(1, &startVBO);
 }
 

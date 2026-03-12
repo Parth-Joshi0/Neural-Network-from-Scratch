@@ -172,7 +172,7 @@ QuadTreeNode* build_track_quadtree(Track* track) {
     // Combine left and right boundary segments
     int left_count = track->left_boundary.count - 1;
     int right_count = track->right_boundary.count - 1;
-    int total_segments = track->num_boundary_segments; // already = left_count + right_count
+    int total_segments = track->num_boundary_segments + 1; // +1 for start segment
     struct BoundarySegment* all_segments = xalloc(total_segments, sizeof(struct BoundarySegment));
 
     // Copy left boundary segments
@@ -184,6 +184,9 @@ QuadTreeNode* build_track_quadtree(Track* track) {
     for (int i = 0; i < right_count; i++) {
         all_segments[left_count + i] = track->right_boundary_segments[i];
     }
+
+    // Add start boundary segment
+    all_segments[left_count + right_count] = track->start_segment;
     
     // Calculate bounds from all points
     Point* all_points = xalloc((track->left_boundary.count + track->right_boundary.count), sizeof(Point));

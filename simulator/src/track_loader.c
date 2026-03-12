@@ -89,6 +89,36 @@ static void track_create_segments(Track *track) {
     int right_segs = track->right_boundary.count - 1;
     track->num_boundary_segments = left_segs + right_segs;
 
+    // Create start boundary segment (left[0] -> right[0]) to block reversing out
+    {
+        struct BoundarySegment *seg = &track->start_segment;
+        seg->start = track->left_boundary.points[0];
+        seg->end   = track->right_boundary.points[0];
+        seg->type  = BOUNDARY_START;
+
+        float dx = seg->end.x - seg->start.x;
+        float dy = seg->end.y - seg->start.y;
+        seg->length = sqrtf(dx * dx + dy * dy);
+
+        if (seg->length > 0) {
+            seg->normal.x = -dy / seg->length;
+            seg->normal.y =  dx / seg->length;
+
+            // Orient normal to point inward (toward left[1], next point along track)
+            Point interior_ref = track->left_boundary.points[1];
+            float to_x = interior_ref.x - seg->start.x;
+            float to_y = interior_ref.y - seg->start.y;
+            float dot = to_x * seg->normal.x + to_y * seg->normal.y;
+            if (dot < 0) {
+                seg->normal.x = -seg->normal.x;
+                seg->normal.y = -seg->normal.y;
+            }
+        } else {
+            seg->normal.x = 0;
+            seg->normal.y = 0;
+        }
+    }
+
     track->left_boundary_segments = xalloc(left_segs, sizeof(struct BoundarySegment));
     track->right_boundary_segments = xalloc(right_segs, sizeof(struct BoundarySegment));
 

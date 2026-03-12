@@ -5,12 +5,14 @@ import numpy as np
 
 lr = 0.0003
 gamma = 0.99
-num_episodes = 1000
+num_episodes = 350000
 sigma = 1.0
 sigma_min = 0.2
-decay_rate = 0.999
+decay_rate = 0.99999
 
-sim = Simulator("tracks/test2.txt", x=8.0, y=9.3, heading=0.0)
+np.random.seed(42)
+
+sim = Simulator("tracks/track_001.txt", x=12.5, y=16.1, heading=0.0)
 nn = NeuralNetwork()
 
 best_avg = -np.inf
@@ -31,7 +33,7 @@ for episode in range(num_episodes):
 
     rewards = [r for _, r, _, _ in trajectory]
     if success:
-        rewards.append(10)
+        rewards.append(1000)
     returns = compute_returns(rewards, gamma)
 
     mean, std = returns.mean(), returns.std()

@@ -10,8 +10,9 @@ typedef struct {
 } Boundary;
 
 typedef enum {
-    BOUNDARY_LEFT, 
-    BOUNDARY_RIGHT
+    BOUNDARY_LEFT,
+    BOUNDARY_RIGHT,
+    BOUNDARY_START
 } BoundaryType;
 
 struct BoundarySegment {
@@ -29,6 +30,7 @@ struct Track {
     int num_boundary_segments;
     struct BoundarySegment *left_boundary_segments;
     struct BoundarySegment *right_boundary_segments;
+    struct BoundarySegment start_segment;
     float *cumulative_length;
     float total_length;
 };

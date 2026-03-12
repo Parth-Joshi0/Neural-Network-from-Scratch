@@ -1,4 +1,5 @@
 #include "sim_lib.h"
+#include <math.h>
 #include "physics.h"
 #include "ray_cast.h"
 #include "quad_tree.h"
@@ -10,7 +11,8 @@
 #include "physics_constants.h"
 #include "track_internals.h"
 
-#define MAX_SIM_STEPS 500
+#define MAX_SIM_STEPS 50000
+#define STEP_PENALTY 1e-7f
 
 static Track* track = NULL;
 static QuadTreeNode* tree = NULL;
@@ -71,7 +73,7 @@ void sim_step(float delta_accel, float delta_steering, float* state_out, float* 
     state_out[10] = car->acceleration / MAX_ACCELERATION;
     state_out[11] = car->steering_angle / MAX_STEERING_ANGLE;
 
-    *reward_out = track->cumulative_length[car->furthest_point_index] - track->cumulative_length[prev_furthest_point_index] - (sim_num * 0.0001f);
+    *reward_out = track->cumulative_length[car->furthest_point_index] - track->cumulative_length[prev_furthest_point_index] - (sim_num * STEP_PENALTY);
     prev_distance_traveled = car->total_distance_traveled;
     if (sim_num >= MAX_SIM_STEPS) {
         car->is_alive = false;
@@ -83,7 +85,12 @@ void sim_step(float delta_accel, float delta_steering, float* state_out, float* 
     float dir_y = finish_pt.y - finish_prev.y;
     float to_car_x = car->position.x - finish_pt.x;
     float to_car_y = car->position.y - finish_pt.y;
-    *success_out = (to_car_x * dir_x + to_car_y * dir_y) >= 0.0f;
+    float len = sqrtf(dir_x * dir_x + dir_y * dir_y);
+    float norm_x = dir_x / len;
+    float norm_y = dir_y / len;
+    float forward = to_car_x * norm_x + to_car_y * norm_y;
+    float lateral = to_car_x * (-norm_y) + to_car_y * norm_x;
+    *success_out = forward >= 0.0f && fabsf(lateral) < 5.0f;
 }
 
 void sim_get_state(float* state_out) {
@@ -146,7 +153,7 @@ static void update_furthest_point_index() {
 
     if (nearest == NULL) return;
 
-    for (int i = 0; i < track->num_boundary_segments; i++) {
+    for (int i = 0; i < track->left_boundary.count - 1; i++) {
         if (track->left_boundary_segments[i].start.x == nearest->start.x &&
             track->left_boundary_segments[i].start.y == nearest->start.y) {
             if (i > car->furthest_point_index) {
