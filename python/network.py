@@ -77,13 +77,13 @@ class NeuralNetwork:
 
         return grads
 
-    def sample_action(self, state) -> tuple[np.ndarray, float]:
+    def sample_action(self, state) -> tuple[np.ndarray, float, dict]:
         mu, cache = self.forward(state)
         noise = np.random.randn(2)
         raw_action = mu + self.sigma * noise
         action = np.clip(raw_action, -1, 1)
         logp = self.log_pi(raw_action, mu)
-        return action, logp
+        return action, logp, cache
 
     def log_pi(self, action, mu):
         var = self.sigma ** 2
@@ -100,3 +100,10 @@ class NeuralNetwork:
         self.b2 -= lr * grads['b2']
         self.w3 -= lr * grads['w3']
         self.b3 -= lr * grads['b3']
+
+    def get_weights(self):
+        return {
+            'w1': self.w1, 'b1': self.b1,
+            'w2': self.w2, 'b2': self.b2,
+            'w3': self.w3, 'b3': self.b3,
+        }
