@@ -70,7 +70,7 @@ Ray angles (relative to car heading): `±75°, ±45°, ±25°, ±10°, 0°`
 
 - **Integration**: Euler, dt = 0.01 s
 - **Steering**: Bicycle model — heading updated by `speed × tan(steering_angle) / wheelbase`
-- **Speed**: Clamped to `[0, MAX_FORWARD_SPEED]` (no reversing)
+- **Speed**: Clamped to `[MAX_REVERSE_SPEED, MAX_FORWARD_SPEED]`
 - **Acceleration**: Clamped to `[-MAX_ACCELERATION, MAX_ACCELERATION]`
 - **Steering**: Clamped to `[-MAX_STEERING_ANGLE, MAX_STEERING_ANGLE]`
 
