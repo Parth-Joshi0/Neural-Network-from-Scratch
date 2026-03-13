@@ -11,8 +11,8 @@
 #include "physics_constants.h"
 #include "track_internals.h"
 
-#define MAX_SIM_STEPS 50000
-#define STEP_PENALTY 1e-7f
+#define MAX_SIM_STEPS 1000
+#define STEP_PENALTY 1e-9f
 
 static Track* track = NULL;
 static QuadTreeNode* tree = NULL;

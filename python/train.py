@@ -3,14 +3,14 @@ from network import NeuralNetwork
 from utils import compute_returns
 import numpy as np
 
-lr = 0.0003
+lr = 3e-4
 gamma = 0.99
-num_episodes = 350000
+num_episodes = 30000
 sigma = 1.0
-sigma_min = 0.2
-decay_rate = 0.99999
+sigma_min = 0.27
+decay_rate = 0.9995
 
-np.random.seed(42)
+np.random.seed(16)
 
 sim = Simulator("tracks/track_001.txt", x=12.5, y=16.1, heading=0.0)
 nn = NeuralNetwork()
