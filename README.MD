@@ -2,7 +2,7 @@
 
 A self-driving car trained using reinforcement learning (REINFORCE / policy gradient), built entirely from scratch — no ML frameworks, no physics engines, no game engines.
 
-The car learns to drive around a track by receiving distance sensor readings and outputting steering and acceleration adjustments. The physics simulation and rendering are implemented in C; training is done in Python using only NumPy.
+The car learns to drive around a track by receiving distance sensor readings and outputting steering and acceleration adjustments. The physics simulation and rendering are implemented in C; training is done in Python using only NumPy (No external libraries).
 
 ## Demo
 
