@@ -14,7 +14,8 @@
 #include "nn.h"
 #include "physics_constants.h"
 
-#define DT 0.01f
+#define DT 1.0f
+#define PHYSICS_STEPS_PER_FRAME 1
 
 static const Point  START_POINT   = {.x = 12.5f, .y = 16.1f};
 static const float  START_HEADING = 0.0f;
@@ -79,27 +80,41 @@ int main(void) {
         return 1;
     }
 
+    Point finish_pt   = track->left_boundary.points[track->left_boundary.count - 1];
+    Point finish_prev = track->left_boundary.points[track->left_boundary.count - 2];
+    float dir_x = finish_pt.x - finish_prev.x;
+    float dir_y = finish_pt.y - finish_prev.y;
+    float len = sqrtf(dir_x * dir_x + dir_y * dir_y);
+    float norm_x = dir_x / len;
+    float norm_y = dir_y / len;
+
     while (!window_should_close()) {
-        Point finish_pt   = track->left_boundary.points[track->left_boundary.count - 1];
-        Point finish_prev = track->left_boundary.points[track->left_boundary.count - 2];
-        float dir_x = finish_pt.x - finish_prev.x;
-        float dir_y = finish_pt.y - finish_prev.y;
-        float to_car_x = car->position.x - finish_pt.x;
-        float to_car_y = car->position.y - finish_pt.y;
-        float len = sqrtf(dir_x * dir_x + dir_y * dir_y);
-        float norm_x = dir_x / len;
-        float norm_y = dir_y / len;
-        float forward = to_car_x * norm_x + to_car_y * norm_y;
-        float lateral = to_car_x * (-norm_y) + to_car_y * norm_x;
-        int success = forward >= 0.0f && fabsf(lateral) < 5.0f;
-        if (!car->is_alive || success) {
-            reset_car(car, START_POINT, START_HEADING);
+        // Advance the simulation several physics steps per rendered frame
+        for (int step = 0; step < PHYSICS_STEPS_PER_FRAME; step++) {
+            float to_car_x = car->position.x - finish_pt.x;
+            float to_car_y = car->position.y - finish_pt.y;
+            float forward = to_car_x * norm_x + to_car_y * norm_y;
+            float lateral = to_car_x * (-norm_y) + to_car_y * norm_x;
+            int success = forward >= 0.0f && fabsf(lateral) < 5.0f;
+            if (!car->is_alive || success) {
+                reset_car(car, START_POINT, START_HEADING);
+            }
+
+            cast_rays(car);
+
+            float state[12];
+            get_state_from_car(car, state);
+
+            float action[2];
+            nn_forward(&nn, state, action);
+            update_car_physics(car, action[0] + car->acceleration, action[1] + car->steering_angle, DT);
+
+            cast_rays(car);
+            check_car_collision(car, tree);
         }
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
-        cast_rays(car);
 
         car_renderer_update(1, &car);
         car_renderer_draw();
@@ -108,16 +123,6 @@ int main(void) {
 
         ray_renderer_update(car);
         ray_renderer_draw();
-
-        float state[12];
-        get_state_from_car(car, state);
-
-        float action[2];
-        nn_forward(&nn, state, action);
-        update_car_physics(car, action[0] + car->acceleration, action[1] + car->heading, DT);
-
-        cast_rays(car);
-        check_car_collision(car, tree);
 
         window_swap_and_poll();
     }
