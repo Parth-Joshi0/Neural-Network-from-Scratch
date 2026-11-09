@@ -26,6 +26,7 @@ Neural-Network-from-Scratch/
 │   ├── simulator.py          # Python ctypes wrapper for the C simulator
 │   ├── utils.py              # Discounted returns computation
 │   ├── file_save.py          # Export trained weights to binary for C
+│   ├── plot_training.py      # Plot lap rate and reward from a training log
 │   ├── best_weights.npy      # Best saved weights (NumPy format)
 │   └── weights.bin           # Exported weights (C-readable binary)
 └── simulator/                # C physics engine + OpenGL visualizer
@@ -55,6 +56,17 @@ The standalone `simulator` binary loads `weights.bin`, runs the trained network 
 - Each step: reward = forward progress along the track
 - Episode end (success): +1000 bonus
 - Episode ends on collision or going off-track
+
+## Training Results
+
+![Lap completion rate and average episode reward over 30,000 training episodes](assets/training_results.png)
+
+One 30,000-episode run on `track_001` (seed 16):
+
+- No laps for the first 24,000 episodes; the first lap came at episode **24,494**
+- **782** laps in total, with **44.7%** of episodes finishing a lap in the last 1,000
+- Average reward rose from about 7 to over 500
+- The final model completes the lap without exploration noise in **412 steps**
 
 ## Neural Network
 
@@ -106,6 +118,13 @@ python train.py
 ```
 
 Prints episode rewards, average over last 10 episodes, step count, and sigma each 10 episodes.
+
+To chart a run, save its output and plot it (requires matplotlib):
+
+```bash
+python -u train.py | tee train_log.txt   # -u shows progress live while saving it
+python plot_training.py train_log.txt    # Writes assets/training_results.png
+```
 
 ### Export Weights and Visualize
 
